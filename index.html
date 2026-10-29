@@ -1,0 +1,1429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>habit • save — track habits, save money</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f5f3f0; display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; padding: 1rem; color: #1a1a1a;
+            -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+        }
+        .app-container {
+            max-width: 480px; width: 100%; background: #ffffff;
+            border-radius: 2.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.02);
+            padding: 2rem 1.5rem 2rem 1.5rem;
+            background: linear-gradient(145deg, #ffffff 0%, #faf9f8 100%);
+            position: relative; overflow: hidden;
+        }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+        .greeting h1 { font-size: 1.8rem; font-weight: 700; letter-spacing: -0.03em; color: #1c1c1e; line-height: 1.2; }
+        .greeting p { font-size: 0.9rem; color: #8e8e93; font-weight: 500; margin-top: 0.2rem; }
+        .header-actions { display: flex; align-items: center; gap: 8px; }
+        .lang-switcher { display: flex; background: #f0ede8; border-radius: 20px; padding: 3px; gap: 2px; }
+        .lang-btn {
+            border: none; background: transparent; font-family: inherit;
+            font-size: 0.65rem; font-weight: 700; color: #8e8e93;
+            padding: 4px 8px; border-radius: 16px; cursor: pointer;
+            transition: all 0.2s ease; letter-spacing: 0.3px;
+        }
+        .lang-btn.active { background: #1c1c1e; color: white; }
+        .lang-btn:hover:not(.active) { background: #e5e2dd; }
+        .avatar {
+            background: #e9e7e2; width: 3rem; height: 3rem; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.3rem; color: #5e5e62; cursor: pointer;
+            border: 2px solid transparent; transition: all 0.2s ease; flex-shrink: 0;
+        }
+        .avatar:hover { background: #dddcd8; border-color: #d0cfcb; }
+        .money-card {
+            background: #1c1c1e; border-radius: 2rem; padding: 1.5rem 1.5rem 1.4rem 1.5rem;
+            margin-bottom: 2.2rem; color: white;
+            box-shadow: 0 18px 30px -10px rgba(0,0,0,0.25);
+            position: relative; overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .money-card::after {
+            content: ''; position: absolute; top: -30%; right: -10%;
+            width: 180px; height: 180px;
+            background: radial-gradient(circle, rgba(255,215,0,0.12) 0%, transparent 70%);
+            border-radius: 50%; pointer-events: none;
+        }
+        .money-label {
+            display: flex; align-items: center; gap: 8px; font-size: 0.9rem;
+            font-weight: 500; color: #aeaeb2; letter-spacing: 0.3px;
+            margin-bottom: 0.5rem; text-transform: uppercase;
+        }
+        .money-label i { font-size: 0.9rem; color: #ffd966; }
+        .money-amount {
+            font-size: 3.2rem; font-weight: 700; letter-spacing: -0.04em;
+            line-height: 1; display: flex; align-items: baseline; gap: 4px;
+            margin-bottom: 0.3rem; color: #ffffff; transition: transform 0.15s ease;
+        }
+        .money-amount.bump { animation: moneyBump 0.4s cubic-bezier(0.34,1.56,0.64,1); }
+        @keyframes moneyBump { 0%{transform:scale(1);} 40%{transform:scale(1.12);} 100%{transform:scale(1);} }
+        .money-amount .currency-symbol {
+            font-size: 1.4rem; font-weight: 500; color: #aeaeb2;
+            letter-spacing: -0.02em; margin-left: 2px;
+        }
+        .money-sub {
+            font-size: 0.85rem; color: #8e8e93; display: flex; align-items: center;
+            gap: 6px; margin-top: 6px; border-top: 1px solid rgba(255,255,255,0.08);
+            padding-top: 12px;
+        }
+        .money-sub i { color: #6c6c70; font-size: 0.8rem; }
+        .badge-save {
+            background: rgba(255,215,0,0.15); padding: 2px 10px; border-radius: 30px;
+            font-size: 0.75rem; font-weight: 600; color: #ffd966;
+            letter-spacing: 0.2px; margin-left: 8px;
+        }
+        .section-title {
+            display: flex; justify-content: space-between; align-items: baseline;
+            margin-bottom: 1.2rem;
+        }
+        .section-title h2 { font-size: 1.25rem; font-weight: 600; letter-spacing: -0.02em; color: #1c1c1e; }
+        .section-title a {
+            font-size: 0.85rem; font-weight: 500; color: #8e8e93; text-decoration: none;
+            cursor: pointer; padding: 4px 8px; border-radius: 8px; transition: 0.2s;
+        }
+        .section-title a:hover { background: #f0ede8; color: #1c1c1e; }
+        .habit-list { display: flex; flex-direction: column; gap: 0.9rem; margin-bottom: 2rem; }
+        .habit-item {
+            display: flex; align-items: center; justify-content: space-between;
+            background: #f8f7f5; padding: 1rem 1.2rem; border-radius: 1.8rem;
+            border: 1px solid rgba(0,0,0,0.02); cursor: pointer;
+            position: relative; overflow: hidden; transition: all 0.2s ease;
+        }
+        .habit-item:hover { background: #f3f2ef; }
+        .habit-item.completing { animation: rowComplete 0.5s cubic-bezier(0.34,1.56,0.64,1); }
+        @keyframes rowComplete {
+            0%{transform:scale(1);} 30%{transform:scale(0.98);background:#f0ede8;}
+            60%{transform:scale(1.01);} 100%{transform:scale(1);}
+        }
+        .habit-item.uncompleting { animation: rowUncomplete 0.35s ease; }
+        @keyframes rowUncomplete {
+            0%{transform:scale(1);} 50%{transform:scale(0.99);background:#f0ede8;}
+            100%{transform:scale(1);}
+        }
+        .habit-left { display: flex; align-items: center; gap: 12px; }
+        .habit-icon {
+            width: 2.8rem; height: 2.8rem; background: #ffffff; border-radius: 1.2rem;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.3rem; color: #1c1c1e;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.02); transition: 0.2s; flex-shrink: 0;
+        }
+        .habit-item.completed-item .habit-icon { background: #e3e1dd; color: #8e8e93; }
+        .habit-item.completing .habit-icon { animation: iconPop 0.5s cubic-bezier(0.34,1.56,0.64,1); }
+        @keyframes iconPop {
+            0%{transform:scale(1) rotate(0deg);} 40%{transform:scale(1.15) rotate(-6deg);}
+            70%{transform:scale(0.95) rotate(3deg);} 100%{transform:scale(1) rotate(0deg);}
+        }
+        .habit-info h3 { font-size: 1rem; font-weight: 600; letter-spacing: -0.01em; color: #1c1c1e; margin-bottom: 2px; }
+        .habit-info .cost {
+            font-size: 0.8rem; font-weight: 500; color: #8e8e93;
+            display: flex; align-items: center; gap: 4px;
+        }
+        .cost i { font-size: 0.7rem; color: #b0b0b5; }
+        .habit-action { display: flex; align-items: center; gap: 10px; }
+        .check-btn {
+            width: 2.4rem; height: 2.4rem; border-radius: 50%; border: none;
+            background: #e9e7e2; color: #8e8e93; font-size: 1rem;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.2s ease;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02); flex-shrink: 0;
+            position: relative; overflow: hidden;
+        }
+        .check-btn::after {
+            content: ''; position: absolute; inset: 0; border-radius: 50%;
+            background: rgba(255,215,0,0.35); transform: scale(0); opacity: 0;
+        }
+        .check-btn.pulse::after { animation: ripple 0.6s ease-out; }
+        @keyframes ripple { 0%{transform:scale(0);opacity:0.8;} 100%{transform:scale(2.2);opacity:0;} }
+        .check-btn.completed { background: #1c1c1e; color: white; box-shadow: 0 6px 12px rgba(0,0,0,0.1); }
+        .check-btn.completed i { font-weight: 900; }
+        .check-btn.completing { animation: btnPop 0.45s cubic-bezier(0.34,1.56,0.64,1); }
+        @keyframes btnPop {
+            0%{transform:scale(1);} 35%{transform:scale(1.25);}
+            65%{transform:scale(0.92);} 100%{transform:scale(1);}
+        }
+        .check-btn.uncompleting { animation: btnUnpop 0.35s ease; }
+        @keyframes btnUnpop { 0%{transform:scale(1);} 40%{transform:scale(0.85);} 100%{transform:scale(1);} }
+        .dollar-fly {
+            position: fixed; pointer-events: none; z-index: 300;
+            font-size: 1.5rem; font-weight: 800; color: #90ee90;
+            text-shadow: 0 2px 10px rgba(144,238,144,0.6);
+            animation: dollarFly 0.9s cubic-bezier(0.22,1,0.36,1) forwards;
+        }
+        @keyframes dollarFly {
+            0%{opacity:0;transform:translate(0,0) scale(0.4) rotate(0deg);}
+            15%{opacity:1;transform:translate(0,-10px) scale(1.3) rotate(-8deg);}
+            100%{opacity:0;transform:translate(var(--fly-x,0px),var(--fly-y,-160px)) scale(0.3) rotate(20deg);}
+        }
+        .confetti-piece {
+            position: fixed; pointer-events: none; z-index: 299;
+            width: 6px; height: 6px; border-radius: 2px;
+            animation: confettiBurst 0.7s ease-out forwards;
+        }
+        @keyframes confettiBurst {
+            0%{opacity:1;transform:translate(0,0) scale(1) rotate(0deg);}
+            100%{opacity:0;transform:translate(var(--tx,0px),var(--ty,0px)) scale(0.2) rotate(360deg);}
+        }
+        .insight-card {
+            background: #ffffff; border-radius: 1.8rem; padding: 1.2rem 1.4rem;
+            border: 1px solid #efedea; display: flex; align-items: center; gap: 14px;
+            box-shadow: 0 10px 18px -8px rgba(0,0,0,0.05); margin-top: 0.6rem;
+        }
+        .insight-icon {
+            background: #1c1c1e; color: #ffd966; width: 3rem; height: 3rem;
+            border-radius: 1.2rem; display: flex; align-items: center; justify-content: center;
+            font-size: 1.3rem; flex-shrink: 0;
+        }
+        .insight-icon.bump { animation: iconBump 0.4s cubic-bezier(0.34,1.56,0.64,1); }
+        @keyframes iconBump { 0%{transform:scale(1);} 50%{transform:scale(1.15);} 100%{transform:scale(1);} }
+        .insight-text { flex: 1; }
+        .insight-text p { font-size: 0.85rem; color: #8e8e93; font-weight: 500; line-height: 1.3; }
+        .insight-text strong { color: #1c1c1e; font-weight: 700; font-size: 1rem; display: block; margin-top: 3px; }
+        .streak-badge {
+            background: #f0ede8; border-radius: 40px; padding: 0.35rem 0.9rem;
+            font-size: 0.75rem; font-weight: 600; color: #5e5e62;
+            display: flex; align-items: center; gap: 4px; white-space: nowrap; flex-shrink: 0;
+        }
+        .streak-badge i { color: #ffb347; font-size: 0.7rem; }
+        .habit-item.completed-item { opacity: 0.75; background: #f4f3f1; }
+        .toast-message {
+            position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(20px);
+            background: #1c1c1e; color: white; font-size: 0.85rem; font-weight: 500;
+            padding: 0.75rem 1.5rem; border-radius: 3rem; opacity: 0;
+            transition: all 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            pointer-events: none; white-space: nowrap; z-index: 500;
+        }
+        .toast-message.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+            display: flex; justify-content: center; align-items: center;
+            padding: 1.5rem; z-index: 200; opacity: 0; pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: all; }
+        .modal-content {
+            background: #ffffff; border-radius: 2.5rem; max-width: 420px; width: 100%;
+            max-height: 85vh; overflow-y: auto; padding: 2rem 1.5rem 1.8rem 1.5rem;
+            box-shadow: 0 40px 80px -20px rgba(0,0,0,0.3);
+            transform: scale(0.95); transition: transform 0.3s ease; position: relative;
+        }
+        .modal-overlay.active .modal-content { transform: scale(1); }
+        .modal-close {
+            position: absolute; top: 1.2rem; right: 1.2rem; background: #f0ede8;
+            border: none; width: 2.4rem; height: 2.4rem; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; color: #5e5e62; font-size: 1rem; transition: 0.2s;
+        }
+        .modal-close:hover { background: #e5e2dd; }
+        .modal-content h2 { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.02em; color: #1c1c1e; margin-bottom: 1.2rem; }
+        .edit-field { margin-bottom: 1rem; }
+        .edit-field label { display: block; font-size: 0.8rem; font-weight: 600; color: #8e8e93; margin-bottom: 0.3rem; }
+        .edit-field input {
+            width: 100%; padding: 0.75rem 1rem; border-radius: 1rem; border: 1.5px solid #e9e7e2;
+            font-family: inherit; font-size: 0.95rem; font-weight: 500; color: #1c1c1e;
+            background: #faf9f8; outline: none; transition: 0.2s;
+        }
+        .edit-field input:focus { border-color: #1c1c1e; background: #ffffff; }
+        .edit-field input[type="number"] { -moz-appearance: textfield; }
+        .edit-field input[type="number"]::-webkit-inner-spin-button,
+        .edit-field input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        .btn-primary {
+            flex: 1; background: #1c1c1e; color: white; border: none;
+            padding: 0.9rem 1.5rem; border-radius: 1.2rem; font-family: inherit;
+            font-size: 0.95rem; font-weight: 600; cursor: pointer;
+            transition: 0.2s; letter-spacing: -0.01em;
+        }
+        .btn-primary:hover { background: #2c2c2e; }
+        .btn-secondary {
+            flex: 1; background: #f0ede8; color: #5e5e62; border: none;
+            padding: 0.9rem 1.5rem; border-radius: 1.2rem; font-family: inherit;
+            font-size: 0.95rem; font-weight: 600; cursor: pointer;
+            transition: 0.2s; letter-spacing: -0.01em;
+        }
+        .btn-secondary:hover { background: #e5e2dd; }
+        .btn-danger {
+            background: #ffe8e8; color: #d44; border: none;
+            padding: 0.7rem 1.2rem; border-radius: 1rem; font-family: inherit;
+            font-size: 0.85rem; font-weight: 600; cursor: pointer;
+            transition: 0.2s; width: 100%; margin-top: 0.5rem;
+        }
+        .btn-danger:hover { background: #ffd6d6; }
+        .profile-avatar-large {
+            width: 5rem; height: 5rem; border-radius: 50%; background: #1c1c1e;
+            color: #ffd966; display: flex; align-items: center; justify-content: center;
+            font-size: 2rem; margin: 0 auto 1rem auto;
+        }
+        .profile-name { text-align: center; font-size: 1.4rem; font-weight: 700; color: #1c1c1e; margin-bottom: 0.2rem; }
+        .profile-sub { text-align: center; font-size: 0.85rem; color: #8e8e93; font-weight: 500; margin-bottom: 1.5rem; }
+        .profile-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin-bottom: 1.5rem; }
+        .profile-stat-card { background: #f8f7f5; border-radius: 1.2rem; padding: 1rem; text-align: center; }
+        .profile-stat-card .stat-value { font-size: 1.3rem; font-weight: 700; color: #1c1c1e; letter-spacing: -0.02em; }
+        .profile-stat-card .stat-label {
+            font-size: 0.7rem; font-weight: 600; color: #8e8e93;
+            text-transform: uppercase; letter-spacing: 0.3px; margin-top: 0.2rem;
+        }
+        .stats-section h3 {
+            font-size: 0.9rem; font-weight: 600; color: #8e8e93;
+            text-transform: uppercase; letter-spacing: 0.4px;
+            margin-bottom: 0.8rem; margin-top: 1.2rem;
+        }
+        .stats-row {
+            display: flex; justify-content: space-between; padding: 0.6rem 0;
+            border-bottom: 1px solid #f0ede8; font-size: 0.9rem;
+            font-weight: 500; color: #1c1c1e;
+        }
+        .stats-row:last-child { border-bottom: none; }
+        .stats-row .label { color: #8e8e93; }
+        .trend-up { color: #2a9d8f; font-weight: 700; }
+        .trend-down { color: #e76f51; font-weight: 700; }
+        .chart-bars { display: flex; align-items: flex-end; gap: 6px; height: 80px; margin-top: 0.5rem; padding-bottom: 0.3rem; }
+        .chart-bar {
+            flex: 1; background: #e9e7e2; border-radius: 6px 6px 2px 2px;
+            min-height: 6px; transition: height 0.3s ease; position: relative;
+        }
+        .chart-bar.active { background: #1c1c1e; }
+        .chart-bar .bar-label {
+            position: absolute; bottom: -1.2rem; left: 50%; transform: translateX(-50%);
+            font-size: 0.55rem; font-weight: 600; color: #8e8e93; white-space: nowrap;
+        }
+        .chart-container { margin-bottom: 1.5rem; padding-bottom: 1.2rem; }
+        .empty-habits { text-align: center; padding: 1.5rem 0; color: #8e8e93; font-size: 0.9rem; font-weight: 500; }
+        .card-display {
+            background: linear-gradient(135deg, #1c1c1e 0%, #2c2c2e 100%);
+            border-radius: 1.5rem; padding: 1.2rem 1.4rem; color: white;
+            position: relative; overflow: hidden; margin-bottom: 1.2rem;
+            box-shadow: 0 10px 25px -8px rgba(0,0,0,0.3);
+        }
+        .card-display::after {
+            content: ''; position: absolute; top: -40%; right: -20%;
+            width: 160px; height: 160px;
+            background: radial-gradient(circle, rgba(255,215,0,0.08) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        .card-display .card-chip {
+            width: 2.2rem; height: 1.6rem;
+            background: linear-gradient(135deg, #d4b65a, #f5e17a);
+            border-radius: 0.4rem; margin-bottom: 0.8rem; position: relative; overflow: hidden;
+        }
+        .card-display .card-chip::after {
+            content: ''; position: absolute; inset: 0;
+            background: repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,0,0,0.15) 2px, rgba(0,0,0,0.15) 4px);
+        }
+        .card-display .card-number {
+            font-size: 1.1rem; font-weight: 600; letter-spacing: 2px;
+            margin-bottom: 0.6rem; font-family: 'Courier New', monospace;
+        }
+        .card-display .card-footer {
+            display: flex; justify-content: space-between; font-size: 0.7rem;
+            color: #aeaeb2; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .card-display .card-brand { position: absolute; bottom: 1rem; right: 1.4rem; font-size: 1.8rem; opacity: 0.6; }
+        .card-empty-state {
+            background: #f8f7f5; border-radius: 1.5rem; padding: 1.8rem 1.2rem;
+            text-align: center; border: 2px dashed #e9e7e2; margin-bottom: 1.2rem;
+        }
+        .card-empty-state i { font-size: 2rem; color: #c7c5c1; margin-bottom: 0.5rem; }
+        .card-empty-state p { font-size: 0.85rem; color: #8e8e93; font-weight: 500; margin-bottom: 0.8rem; }
+        .card-input-group { margin-bottom: 0.8rem; }
+        .card-input-group label {
+            display: block; font-size: 0.75rem; font-weight: 600; color: #8e8e93;
+            margin-bottom: 0.3rem; letter-spacing: 0.3px; text-transform: uppercase;
+        }
+        .card-input-group input {
+            width: 100%; padding: 0.7rem 1rem; border-radius: 1rem; border: 1.5px solid #e9e7e2;
+            font-family: 'Courier New', monospace; font-size: 0.9rem; font-weight: 500;
+            color: #1c1c1e; background: #faf9f8; outline: none; transition: 0.2s; letter-spacing: 1px;
+        }
+        .card-input-group input:focus { border-color: #1c1c1e; background: #ffffff; }
+        .card-input-row { display: flex; gap: 0.8rem; }
+        .card-input-row .card-input-group { flex: 1; }
+        .card-status-badge {
+            display: inline-flex; align-items: center; gap: 4px; background: #e8f5e9;
+            color: #2a9d8f; font-size: 0.7rem; font-weight: 600;
+            padding: 3px 10px; border-radius: 20px; margin-top: 0.5rem;
+        }
+        .card-status-badge i { font-size: 0.6rem; }
+        .linked-card-info { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+        .linked-card-info .card-label { font-size: 0.8rem; color: #8e8e93; font-weight: 500; }
+        .unlink-btn {
+            background: none; border: none; color: #d44; font-size: 0.8rem;
+            font-weight: 600; cursor: pointer; padding: 4px 8px; border-radius: 8px; transition: 0.2s;
+        }
+        .unlink-btn:hover { background: #ffe8e8; }
+        .transaction-list { margin-top: 0.5rem; }
+        .transaction-item {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0.7rem 0; border-bottom: 1px solid #f0ede8; font-size: 0.85rem;
+        }
+        .transaction-item:last-child { border-bottom: none; }
+        .transaction-left { display: flex; align-items: center; gap: 10px; }
+        .transaction-icon {
+            width: 2.2rem; height: 2.2rem; border-radius: 0.8rem; background: #f8f7f5;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.8rem; color: #8e8e93;
+        }
+        .transaction-icon.saved { background: #e8f5e9; color: #2a9d8f; }
+        .transaction-icon.spent { background: #ffe8e8; color: #d44; }
+        .transaction-info .transaction-name { font-weight: 600; color: #1c1c1e; }
+        .transaction-info .transaction-date { font-size: 0.7rem; color: #8e8e93; font-weight: 500; }
+        .transaction-amount { font-weight: 700; font-size: 0.9rem; }
+        .transaction-amount.positive { color: #2a9d8f; }
+        .transaction-amount.negative { color: #1c1c1e; }
+        .modal-content::-webkit-scrollbar { width: 4px; }
+        .modal-content::-webkit-scrollbar-track { background: transparent; }
+        .modal-content::-webkit-scrollbar-thumb { background: #d0cfcb; border-radius: 4px; }
+        @media (max-width: 400px) {
+            .app-container { padding: 1.5rem 1rem; }
+            .money-amount { font-size: 2.6rem; }
+            .habit-item { padding: 0.9rem 1rem; }
+            .modal-content { padding: 1.5rem 1rem 1.3rem 1rem; border-radius: 1.8rem; }
+            .greeting h1 { font-size: 1.4rem; }
+            .lang-btn { font-size: 0.55rem; padding: 3px 6px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <div class="header">
+            <div class="greeting">
+                <h1 id="greetingTitle">hey, alex</h1>
+                <p id="greetingSub">you’re doing great ✦</p>
+            </div>
+            <div class="header-actions">
+                <div class="lang-switcher" id="langSwitcher">
+                    <button class="lang-btn active" data-lang="en">EN</button>
+                    <button class="lang-btn" data-lang="ru">RU</button>
+                    <button class="lang-btn" data-lang="uz">UZ</button>
+                </div>
+                <div class="avatar" id="profileAvatarBtn" role="button" tabindex="0" aria-label="open profile">
+                    <i class="fas fa-user"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="money-card" id="moneyCard">
+            <div class="money-label">
+                <i class="fas fa-piggy-bank"></i> <span id="potentialSavingsLabel">potential savings</span>
+                <span class="badge-save" id="liveBadge">live</span>
+            </div>
+            <div class="money-amount" id="moneyAmountContainer">
+                <span id="totalSavings">0</span>
+                <span class="currency-symbol">$</span>
+            </div>
+            <div class="money-sub" id="moneySub">
+                <i class="fas fa-arrow-trend-up"></i> <span id="moneySubText">you didn't spend on 0 habits today</span>
+                <i class="fas fa-circle" style="font-size: 4px; color: #5e5e62; margin-left: auto;"></i>
+            </div>
+        </div>
+
+        <div class="section-title">
+            <h2 id="dailyHabitsTitle">daily habits</h2>
+            <a href="#" id="editHabitsLink">edit</a>
+        </div>
+
+        <div class="habit-list" id="habitList"></div>
+
+        <div class="insight-card">
+            <div class="insight-icon" id="insightIcon">
+                <i class="fas fa-seedling"></i>
+            </div>
+            <div class="insight-text">
+                <p><span id="savedTodayLabel">you saved</span> <strong id="todaySavingPreview">0 $</strong> <span id="todayLabel">today</span></p>
+            </div>
+            <div class="streak-badge">
+                <i class="fas fa-fire"></i> <span id="streakText">0 day streak</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-message" id="toast">saved!</div>
+
+    <!-- EDIT HABITS MODAL -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal-content">
+            <button class="modal-close" id="closeEditModal" aria-label="close">&times;</button>
+            <h2 id="editModalTitle">edit habits</h2>
+            <div id="editFormContainer"></div>
+            <button class="btn-primary" id="saveHabitsBtn" style="width:100%;margin-top:0.8rem;">save changes</button>
+        </div>
+    </div>
+
+    <!-- PROFILE MODAL -->
+    <div class="modal-overlay" id="profileModal">
+        <div class="modal-content">
+            <button class="modal-close" id="closeProfileModal" aria-label="close">&times;</button>
+            <div class="profile-avatar-large"><i class="fas fa-user"></i></div>
+            <div class="profile-name">Alex</div>
+            <div class="profile-sub" id="profileSub">member since jan 2024</div>
+            <div class="profile-stats">
+                <div class="profile-stat-card">
+                    <div class="stat-value" id="profileTotalSaved">0 $</div>
+                    <div class="stat-label" id="profileTotalSavedLabel">total saved</div>
+                </div>
+                <div class="profile-stat-card">
+                    <div class="stat-value" id="profileHabitCount">0</div>
+                    <div class="stat-label" id="profileHabitCountLabel">habits tracked</div>
+                </div>
+            </div>
+            <button class="btn-primary" style="width:100%;margin-bottom:0.8rem;" id="openCardFromProfile">link your card</button>
+            <button class="btn-primary" style="width:100%;" id="openStatsFromProfile">view statistics</button>
+        </div>
+    </div>
+
+    <!-- STATISTICS MODAL -->
+    <div class="modal-overlay" id="statsModal">
+        <div class="modal-content">
+            <button class="modal-close" id="closeStatsModal" aria-label="close">&times;</button>
+            <h2 id="statsModalTitle">statistics</h2>
+            <div class="stats-section">
+                <h3 id="thisWeekLabel">this week</h3>
+                <div class="chart-container"><div class="chart-bars" id="chartBars"></div></div>
+                <div class="stats-row"><span class="label" id="todaysSavingsLabel">today's savings</span><span id="statTodaySavings">0 $</span></div>
+                <div class="stats-row"><span class="label" id="weekTotalLabel">this week total</span><span id="statWeekTotal">0 $</span></div>
+                <div class="stats-row"><span class="label" id="trendLabel">trend vs last week</span><span id="statTrend" class="trend-up">+0 %</span></div>
+                <div class="stats-row"><span class="label" id="bestDayLabel">best day</span><span id="statBestDay">—</span></div>
+                <h3 id="habitsBreakdownLabel">habits breakdown</h3>
+                <div id="statsHabitBreakdown"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CARD LINK MODAL -->
+    <div class="modal-overlay" id="cardModal">
+        <div class="modal-content">
+            <button class="modal-close" id="closeCardModal" aria-label="close">&times;</button>
+            <h2 id="cardModalTitle">your card</h2>
+            <div id="cardContent"></div>
+        </div>
+    </div>
+
+    <!-- TRANSACTIONS MODAL -->
+    <div class="modal-overlay" id="transactionsModal">
+        <div class="modal-content">
+            <button class="modal-close" id="closeTransactionsModal" aria-label="close">&times;</button>
+            <h2 id="transactionsModalTitle">transactions</h2>
+            <div id="transactionsContent"></div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            'use strict';
+
+            // ==================== TRANSLATIONS ====================
+            const translations = {
+                en: {
+                    greetingTitle: 'hey, alex', greetingSub: 'you’re doing great ✦',
+                    potentialSavings: 'potential savings', live: 'live',
+                    moneySub: (count) => `you didn't spend on ${count} habit${count !== 1 ? 's' : ''} today`,
+                    dailyHabits: 'daily habits', edit: 'edit', savedToday: 'you saved', today: 'today',
+                    streak: (n) => `${n} day streak`,
+                    editModalTitle: 'edit habits', saveChanges: 'save changes', addHabit: '+ add habit',
+                    remove: 'remove', habit: 'habit', habitName: 'habit name', cost: 'cost',
+                    profileSub: 'member since jan 2024', totalSaved: 'total saved', habitsTracked: 'habits tracked',
+                    linkCard: 'link your card', viewStats: 'view statistics',
+                    statsTitle: 'statistics', thisWeek: 'this week', todaysSavings: "today's savings",
+                    weekTotal: 'this week total', trendLabel: 'trend vs last week', bestDay: 'best day',
+                    habitsBreakdown: 'habits breakdown', cardTitle: 'your card',
+                    cardEmptyText: 'link your card to automatically track expenses and savings',
+                    cardholderName: 'cardholder name', cardNumber: 'card number', expiry: 'expiry', cvv: 'cvv',
+                    linkSecurely: 'link card securely', demoNote: 'demo only — data saved locally on your device',
+                    linkedCard: 'linked card', unlink: 'unlink', connectedSyncing: 'connected & syncing',
+                    viewTransactions: 'view transactions', transactionsTitle: 'transactions',
+                    summary: 'summary', totalSpent: 'total spent', totalSavedLabel: 'total saved', net: 'net',
+                    recentTransactions: 'recent transactions', cardLinked: 'card linked successfully ✓',
+                    cardUnlinked: 'card unlinked',
+                    pleaseEnterName: 'please enter cardholder name',
+                    pleaseEnterCard: 'please enter a valid 16-digit card number',
+                    pleaseEnterExpiry: 'please enter expiry as MM/YY', pleaseEnterCvv: 'please enter CVV',
+                    habitsUpdated: 'habits updated ✓',
+                    savedToast: (amount) => `✓ saved ${amount} $ — nice!`,
+                    unmarkedToast: '↺ habit unmarked, savings adjusted',
+                    done: '✓ done', pending: '— pending',
+                    monday: 'monday', tuesday: 'tuesday', wednesday: 'wednesday',
+                    thursday: 'thursday', friday: 'friday', saturday: 'saturday', sunday: 'sunday',
+                    cardLinkedTx: 'Card linked', justNow: 'Just now',
+                    noHabits: 'no habits yet — tap "edit" to add one',
+                    analysisTitle: 'spending analysis', topCategory: 'top spending category',
+                    avgDaily: 'avg daily spend', savingsRate: 'savings rate',
+                    insights: 'insights', noCardYet: 'link a card to see spending analysis',
+                    weeklySpend: 'weekly spend', vsLastWeek: 'vs last week'
+                },
+                ru: {
+                    greetingTitle: 'привет, алекс', greetingSub: 'ты молодец ✦',
+                    potentialSavings: 'потенциальная экономия', live: 'онлайн',
+                    moneySub: (count) => `ты не потратил на ${count} ${count === 1 ? 'привычку' : 'привычки'} сегодня`,
+                    dailyHabits: 'ежедневные привычки', edit: 'изменить', savedToday: 'ты сэкономил', today: 'сегодня',
+                    streak: (n) => `${n} дней подряд`,
+                    editModalTitle: 'изменить привычки', saveChanges: 'сохранить', addHabit: '+ добавить привычку',
+                    remove: 'удалить', habit: 'привычка', habitName: 'название привычки', cost: 'стоимость',
+                    profileSub: 'участник с января 2024', totalSaved: 'всего сэкономлено', habitsTracked: 'отслеживаемых привычек',
+                    linkCard: 'привязать карту', viewStats: 'посмотреть статистику',
+                    statsTitle: 'статистика', thisWeek: 'на этой неделе', todaysSavings: 'экономия сегодня',
+                    weekTotal: 'итого за неделю', trendLabel: 'тренд по сравнению с прошлой неделей',
+                    bestDay: 'лучший день', habitsBreakdown: 'разбивка привычек', cardTitle: 'твоя карта',
+                    cardEmptyText: 'привяжи карту для автоматического отслеживания расходов и экономии',
+                    cardholderName: 'имя владельца', cardNumber: 'номер карты', expiry: 'срок действия', cvv: 'CVV',
+                    linkSecurely: 'привязать карту безопасно', demoNote: 'только демо — данные сохраняются локально на устройстве',
+                    linkedCard: 'привязанная карта', unlink: 'отвязать', connectedSyncing: 'подключено и синхронизируется',
+                    viewTransactions: 'посмотреть транзакции', transactionsTitle: 'транзакции',
+                    summary: 'сводка', totalSpent: 'всего потрачено', totalSavedLabel: 'всего сэкономлено', net: 'итого',
+                    recentTransactions: 'последние транзакции', cardLinked: 'карта успешно привязана ✓',
+                    cardUnlinked: 'карта отвязана',
+                    pleaseEnterName: 'пожалуйста, введите имя владельца',
+                    pleaseEnterCard: 'пожалуйста, введите корректный 16-значный номер карты',
+                    pleaseEnterExpiry: 'пожалуйста, введите срок действия в формате ММ/ГГ',
+                    pleaseEnterCvv: 'пожалуйста, введите CVV',
+                    habitsUpdated: 'привычки обновлены ✓',
+                    savedToast: (amount) => `✓ сэкономлено ${amount} $ — отлично!`,
+                    unmarkedToast: '↺ привычка отменена, экономия скорректирована',
+                    done: '✓ выполнено', pending: '— в ожидании',
+                    monday: 'понедельник', tuesday: 'вторник', wednesday: 'среда',
+                    thursday: 'четверг', friday: 'пятница', saturday: 'суббота', sunday: 'воскресенье',
+                    cardLinkedTx: 'Карта привязана', justNow: 'Только что',
+                    noHabits: 'пока нет привычек — нажми "изменить", чтобы добавить',
+                    analysisTitle: 'анализ расходов', topCategory: 'главная категория расходов',
+                    avgDaily: 'средний дневной расход', savingsRate: 'доля сбережений',
+                    insights: 'аналитика', noCardYet: 'привяжи карту для анализа расходов',
+                    weeklySpend: 'расходы за неделю', vsLastWeek: 'по сравнению с прошлой неделей'
+                },
+                uz: {
+                    greetingTitle: 'salom, alex', greetingSub: 'zoʻr ketyapsan ✦',
+                    potentialSavings: 'potensial tejash', live: 'jonli',
+                    moneySub: (count) => `bugun ${count} ta odatga pul sarflamading`,
+                    dailyHabits: 'kunlik odatlar', edit: 'tahrirlash', savedToday: 'tejading', today: 'bugun',
+                    streak: (n) => `${n} kunlik seriya`,
+                    editModalTitle: 'odatlarni tahrirlash', saveChanges: 'saqlash', addHabit: '+ odat qoʻshish',
+                    remove: 'oʻchirish', habit: 'odat', habitName: 'odat nomi', cost: 'narxi',
+                    profileSub: '2024 yil yanvardan beri aʼzo', totalSaved: 'jami tejaldi', habitsTracked: 'kuzatilayotgan odatlar',
+                    linkCard: 'kartangizni bogʻlang', viewStats: 'statistikani koʻrish',
+                    statsTitle: 'statistika', thisWeek: 'bu hafta', todaysSavings: 'bugungi tejash',
+                    weekTotal: 'hafta jami', trendLabel: 'oʻtgan haftaga nisbatan tendensiya',
+                    bestDay: 'eng yaxshi kun', habitsBreakdown: 'odatlar tafsiloti', cardTitle: 'sizning kartangiz',
+                    cardEmptyText: 'xarajatlar va tejashni avtomatik kuzatish uchun kartangizni bogʻlang',
+                    cardholderName: 'karta egasi', cardNumber: 'karta raqami', expiry: 'amal qilish muddati', cvv: 'CVV',
+                    linkSecurely: 'kartani xavfsiz bogʻlash', demoNote: 'faqat demo — maʼlumotlar qurilmangizda saqlanadi',
+                    linkedCard: 'bogʻlangan karta', unlink: 'uzish', connectedSyncing: 'ulangan va sinxronlanmoqda',
+                    viewTransactions: 'tranzaksiyalarni koʻrish', transactionsTitle: 'tranzaksiyalar',
+                    summary: 'xulosa', totalSpent: 'jami sarflandi', totalSavedLabel: 'jami tejaldi', net: 'sof',
+                    recentTransactions: 'soʻnggi tranzaksiyalar', cardLinked: 'karta muvaffaqiyatli bogʻlandi ✓',
+                    cardUnlinked: 'karta uzildi',
+                    pleaseEnterName: 'iltimos, karta egasini kiriting',
+                    pleaseEnterCard: 'iltimos, 16 xonali karta raqamini kiriting',
+                    pleaseEnterExpiry: 'iltimos, amal qilish muddatini OO/YY shaklida kiriting',
+                    pleaseEnterCvv: 'iltimos, CVV kiriting',
+                    habitsUpdated: 'odatlar yangilandi ✓',
+                    savedToast: (amount) => `✓ ${amount} $ tejaldi — zoʻr!`,
+                    unmarkedToast: '↺ odat bekor qilindi, tejash tuzatildi',
+                    done: '✓ bajarildi', pending: '— kutilmoqda',
+                    monday: 'dushanba', tuesday: 'seshanba', wednesday: 'chorshanba',
+                    thursday: 'payshanba', friday: 'juma', saturday: 'shanba', sunday: 'yakshanba',
+                    cardLinkedTx: 'Karta bogʻlandi', justNow: 'Hozirgina',
+                    noHabits: 'hali odatlar yoʻq — qoʻshish uchun "tahrirlash" tugmasini bosing',
+                    analysisTitle: 'xarajat tahlili', topCategory: 'eng katta xarajat kategoriyasi',
+                    avgDaily: 'oʻrtacha kunlik xarajat', savingsRate: 'tejash darajasi',
+                    insights: 'tahlil', noCardYet: 'xarajat tahlili uchun kartani bogʻlang',
+                    weeklySpend: 'haftalik xarajat', vsLastWeek: 'oʻtgan haftaga nisbatan'
+                }
+            };
+
+            let currentLang = localStorage.getItem('hs_lang') || 'en';
+
+            // ==================== PERSISTENCE LAYER ====================
+            const STORAGE_KEY = 'habit_save_data_v2';
+
+            function loadState() {
+                try {
+                    const raw = localStorage.getItem(STORAGE_KEY);
+                    if (raw) return JSON.parse(raw);
+                } catch (e) { console.warn('load failed', e); }
+                return null;
+            }
+
+            function saveState() {
+                try {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+                        habits, linkedCard, transactions, history, streak,
+                        lastOpenDate: new Date().toDateString()
+                    }));
+                } catch (e) { console.warn('save failed', e); }
+            }
+
+            // ==================== DEFAULT DATA ====================
+            const defaultHabits = [
+                { id: 0, nameKey: 0, icon: 'fa-coffee', cost: 4.50, completed: false },
+                { id: 1, nameKey: 1, icon: 'fa-utensils', cost: 12.00, completed: false },
+                { id: 2, nameKey: 2, icon: 'fa-bottle-water', cost: 3.00, completed: false }
+            ];
+
+            const habitNames = {
+                en: ['skip cappuccino', 'cook at home', 'tap water'],
+                ru: ['пропустить капучино', 'готовить дома', 'водопроводная вода'],
+                uz: ['kapuchinoni tashlash', 'uyda ovqat tayyorlash', 'vodoprovod suvi']
+            };
+
+            const defaultTransactions = [
+                { id: 1, name: 'Whole Foods Market', date: 'Today, 10:24 AM', amount: -34.50, icon: 'fa-shopping-basket', category: 'groceries' },
+                { id: 2, name: 'Savings from habits', date: 'Today, 9:00 AM', amount: 19.50, icon: 'fa-piggy-bank', category: 'savings' },
+                { id: 3, name: 'Starbucks Coffee', date: 'Yesterday, 3:15 PM', amount: -5.80, icon: 'fa-coffee', category: 'coffee' },
+                { id: 4, name: 'Uber Ride', date: 'Yesterday, 8:30 AM', amount: -12.00, icon: 'fa-car', category: 'transport' },
+                { id: 5, name: 'Savings from habits', date: 'Yesterday, 9:00 AM', amount: 15.00, icon: 'fa-piggy-bank', category: 'savings' },
+                { id: 6, name: 'Netflix Subscription', date: '2 days ago', amount: -15.99, icon: 'fa-tv', category: 'entertainment' },
+                { id: 7, name: 'Grocery Store', date: '2 days ago', amount: -48.20, icon: 'fa-shopping-basket', category: 'groceries' },
+                { id: 8, name: 'Savings from habits', date: '2 days ago', amount: 5.50, icon: 'fa-piggy-bank', category: 'savings' },
+                { id: 9, name: 'Amazon Purchase', date: '3 days ago', amount: -29.99, icon: 'fa-shopping-cart', category: 'shopping' },
+                { id: 10, name: 'Savings from habits', date: '3 days ago', amount: 12.00, icon: 'fa-piggy-bank', category: 'savings' }
+            ];
+
+            const defaultHistory = {
+                dailySavings: [8.5, 12.0, 5.5, 15.0, 10.0, 7.5, 0],
+                lastWeekTotal: 48.5,
+                dailyCompleted: [2, 2, 1, 3, 2, 2, 0]
+            };
+
+            // ==================== STATE INIT ====================
+            const saved = loadState();
+            let habits = saved?.habits || defaultHabits;
+            let linkedCard = saved?.linkedCard || null;
+            let transactions = saved?.transactions || defaultTransactions;
+            let history = saved?.history || defaultHistory;
+            let streak = saved?.streak || 0;
+
+            // Reset daily completion if new day
+            const today = new Date().toDateString();
+            if (saved?.lastOpenDate && saved.lastOpenDate !== today) {
+                habits.forEach(h => h.completed = false);
+                streak += 1;
+            } else if (!saved) {
+                streak = 1;
+            }
+
+            // ==================== DOM REFS ====================
+            const $ = id => document.getElementById(id);
+            const totalSavingsSpan = $('totalSavings');
+            const todayPreview = $('todaySavingPreview');
+            const moneySubTextEl = $('moneySubText');
+            const habitList = $('habitList');
+            const toast = $('toast');
+            const editLink = $('editHabitsLink');
+            const profileAvatarBtn = $('profileAvatarBtn');
+            const moneyAmountContainer = $('moneyAmountContainer');
+            const insightIcon = $('insightIcon');
+            const moneyCard = $('moneyCard');
+            const greetingTitle = $('greetingTitle');
+            const greetingSub = $('greetingSub');
+            const potentialSavingsLabel = $('potentialSavingsLabel');
+            const liveBadge = $('liveBadge');
+            const dailyHabitsTitle = $('dailyHabitsTitle');
+            const editLinkText = $('editHabitsLink');
+            const savedTodayLabel = $('savedTodayLabel');
+            const todayLabel = $('todayLabel');
+            const streakText = $('streakText');
+            const editModal = $('editModal');
+            const closeEditModal = $('closeEditModal');
+            const editFormContainer = $('editFormContainer');
+            const saveHabitsBtn = $('saveHabitsBtn');
+            const editModalTitle = $('editModalTitle');
+            const profileModal = $('profileModal');
+            const closeProfileModal = $('closeProfileModal');
+            const profileTotalSaved = $('profileTotalSaved');
+            const profileHabitCount = $('profileHabitCount');
+            const openStatsFromProfile = $('openStatsFromProfile');
+            const openCardFromProfile = $('openCardFromProfile');
+            const profileSub = $('profileSub');
+            const profileTotalSavedLabel = $('profileTotalSavedLabel');
+            const profileHabitCountLabel = $('profileHabitCountLabel');
+            const statsModal = $('statsModal');
+            const closeStatsModal = $('closeStatsModal');
+            const chartBars = $('chartBars');
+            const statTodaySavings = $('statTodaySavings');
+            const statWeekTotal = $('statWeekTotal');
+            const statTrend = $('statTrend');
+            const statBestDay = $('statBestDay');
+            const statsHabitBreakdown = $('statsHabitBreakdown');
+            const statsModalTitle = $('statsModalTitle');
+            const thisWeekLabel = $('thisWeekLabel');
+            const todaysSavingsLabel = $('todaysSavingsLabel');
+            const weekTotalLabel = $('weekTotalLabel');
+            const trendLabel = $('trendLabel');
+            const bestDayLabel = $('bestDayLabel');
+            const habitsBreakdownLabel = $('habitsBreakdownLabel');
+            const cardModal = $('cardModal');
+            const closeCardModal = $('closeCardModal');
+            const cardContent = $('cardContent');
+            const cardModalTitle = $('cardModalTitle');
+            const transactionsModal = $('transactionsModal');
+            const closeTransactionsModal = $('closeTransactionsModal');
+            const transactionsContent = $('transactionsContent');
+            const transactionsModalTitle = $('transactionsModalTitle');
+            const langSwitcher = $('langSwitcher');
+
+            let toastTimeout = null;
+
+            // ==================== UTILS ====================
+            function t(key) { return translations[currentLang][key]; }
+            function habitName(h) {
+                const names = habitNames[currentLang] || habitNames.en;
+                return names[h.nameKey] || h.name || 'habit';
+            }
+            function formatCompact(value) {
+                if (value === 0) return '0';
+                return value.toFixed(2).replace(/\.?0+$/, '');
+            }
+            function calculateTotal() {
+                return habits.reduce((sum, h) => sum + (h.completed ? h.cost : 0), 0);
+            }
+            function escapeHtml(str) {
+                const div = document.createElement('div');
+                div.textContent = str;
+                return div.innerHTML;
+            }
+
+            // ==================== REAL TRANSACTION ANALYSIS ====================
+            function analyzeTransactions() {
+                const spent = transactions.filter(tx => tx.amount < 0);
+                const savedTx = transactions.filter(tx => tx.amount > 0);
+                const totalSpent = spent.reduce((s, tx) => s + Math.abs(tx.amount), 0);
+                const totalSaved = savedTx.reduce((s, tx) => s + tx.amount, 0);
+
+                const byCategory = {};
+                spent.forEach(tx => {
+                    const cat = tx.category || 'other';
+                    byCategory[cat] = (byCategory[cat] || 0) + Math.abs(tx.amount);
+                });
+                const topCategory = Object.entries(byCategory).sort((a, b) => b[1] - a[1])[0] || ['none', 0];
+                const avgDaily = totalSpent / 7;
+                const savingsRate = (totalSaved + totalSpent) > 0
+                    ? (totalSaved / (totalSaved + totalSpent)) * 100
+                    : 0;
+
+                const thisWeekSpent = totalSpent;
+                const lastWeekSpent = defaultHistory.lastWeekTotal * 1.4;
+                const spendTrend = lastWeekSpent > 0
+                    ? ((thisWeekSpent - lastWeekSpent) / lastWeekSpent) * 100
+                    : 0;
+
+                const insights = [];
+                if (topCategory[1] > 0) {
+                    insights.push({ type: 'warn', text: `${t('topCategory')}: ${topCategory[0]} (${formatCompact(topCategory[1])} $)` });
+                }
+                if (savingsRate >= 20) {
+                    insights.push({ type: 'good', text: `${t('savingsRate')}: ${savingsRate.toFixed(1)}% — excellent!` });
+                } else if (savingsRate > 0) {
+                    insights.push({ type: 'warn', text: `${t('savingsRate')}: ${savingsRate.toFixed(1)}%` });
+                }
+                if (avgDaily > 0) {
+                    insights.push({ type: 'neutral', text: `${t('avgDaily')}: ${formatCompact(avgDaily)} $` });
+                }
+                if (spendTrend < -5) {
+                    insights.push({ type: 'good', text: `${t('weeklySpend')} ↓ ${Math.abs(spendTrend).toFixed(1)}% ${t('vsLastWeek')}` });
+                } else if (spendTrend > 5) {
+                    insights.push({ type: 'warn', text: `${t('weeklySpend')} ↑ ${spendTrend.toFixed(1)}% ${t('vsLastWeek')}` });
+                }
+
+                return { totalSpent, totalSaved, byCategory, topCategory, avgDaily, savingsRate, spendTrend, insights };
+            }
+
+            // ==================== LANGUAGE ====================
+            function setLanguage(lang) {
+                currentLang = lang;
+                localStorage.setItem('hs_lang', lang);
+                langSwitcher.querySelectorAll('.lang-btn').forEach(btn => {
+                    btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
+                });
+
+                greetingTitle.textContent = t('greetingTitle');
+                greetingSub.textContent = t('greetingSub');
+                potentialSavingsLabel.textContent = t('potentialSavings');
+                liveBadge.textContent = t('live');
+                dailyHabitsTitle.textContent = t('dailyHabits');
+                editLinkText.textContent = t('edit');
+                savedTodayLabel.textContent = t('savedToday');
+                todayLabel.textContent = t('today');
+                streakText.textContent = t('streak')(streak);
+                editModalTitle.textContent = t('editModalTitle');
+                saveHabitsBtn.textContent = t('saveChanges');
+                profileSub.textContent = t('profileSub');
+                profileTotalSavedLabel.textContent = t('totalSaved');
+                profileHabitCountLabel.textContent = t('habitsTracked');
+                openCardFromProfile.textContent = t('linkCard');
+                openStatsFromProfile.textContent = t('viewStats');
+                statsModalTitle.textContent = t('statsTitle');
+                thisWeekLabel.textContent = t('thisWeek');
+                todaysSavingsLabel.textContent = t('todaysSavings');
+                weekTotalLabel.textContent = t('weekTotal');
+                trendLabel.textContent = t('trendLabel');
+                bestDayLabel.textContent = t('bestDay');
+                habitsBreakdownLabel.textContent = t('habitsBreakdown');
+                cardModalTitle.textContent = t('cardTitle');
+                transactionsModalTitle.textContent = t('transactionsTitle');
+
+                render();
+            }
+
+            // ==================== RENDER ====================
+            function renderHabits() {
+                if (habits.length === 0) {
+                    habitList.innerHTML = `<div class="empty-habits">${t('noHabits')}</div>`;
+                    return;
+                }
+
+                habitList.innerHTML = habits.map((h, idx) => `
+                    <div class="habit-item${h.completed ? ' completed-item' : ''}" data-index="${idx}" data-cost="${h.cost}">
+                        <div class="habit-left">
+                            <div class="habit-icon"><i class="fas ${h.icon}"></i></div>
+                            <div class="habit-info">
+                                <h3>${escapeHtml(habitName(h))}</h3>
+                                <div class="cost"><i class="fas fa-dollar-sign"></i> ${formatCompact(h.cost)} / day</div>
+                            </div>
+                        </div>
+                        <div class="habit-action">
+                            <button class="check-btn${h.completed ? ' completed' : ''}" data-index="${idx}" aria-pressed="${h.completed}"><i class="fas fa-check"></i></button>
+                        </div>
+                    </div>
+                `).join('');
+
+                habitList.querySelectorAll('.check-btn').forEach(btn => {
+                    btn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        handleToggle(parseInt(this.getAttribute('data-index'), 10), this);
+                    });
+                });
+
+                habitList.querySelectorAll('.habit-item').forEach(item => {
+                    item.addEventListener('click', function(e) {
+                        if (e.target.closest('.check-btn')) return;
+                        const idx = parseInt(item.getAttribute('data-index'), 10);
+                        const btn = item.querySelector('.check-btn');
+                        if (!isNaN(idx)) handleToggle(idx, btn);
+                    });
+                });
+            }
+
+            function render() {
+                const total = calculateTotal();
+                const formatted = formatCompact(total);
+
+                totalSavingsSpan.textContent = formatted;
+                todayPreview.textContent = formatted + ' $';
+
+                const completedCount = habits.filter(h => h.completed).length;
+                moneySubTextEl.textContent = t('moneySub')(completedCount);
+                streakText.textContent = t('streak')(streak);
+
+                renderHabits();
+
+                history.dailySavings[history.dailySavings.length - 1] = total;
+                history.dailyCompleted[history.dailyCompleted.length - 1] = completedCount;
+                saveState();
+            }
+
+            // ==================== ANIMATIONS ====================
+            function playBump(el, cls = 'bump') {
+                el.classList.remove(cls);
+                void el.offsetWidth;
+                el.classList.add(cls);
+                setTimeout(() => el.classList.remove(cls), 600);
+            }
+
+            function spawnDollars(sourceEl, count = 5) {
+                const src = sourceEl.getBoundingClientRect();
+                const tgt = moneyCard.getBoundingClientRect();
+                const startX = src.left + src.width / 2;
+                const startY = src.top + src.height / 2;
+                const endX = tgt.left + tgt.width / 2;
+                const endY = tgt.top + 40;
+
+                for (let i = 0; i < count; i++) {
+                    const d = document.createElement('div');
+                    d.className = 'dollar-fly';
+                    d.textContent = '$';
+                    const ox = (Math.random() - 0.5) * 30;
+                    const oy = (Math.random() - 0.5) * 20;
+                    d.style.left = (startX + ox) + 'px';
+                    d.style.top = (startY + oy) + 'px';
+                    d.style.setProperty('--fly-x', (endX - startX + (Math.random() - 0.5) * 40) + 'px');
+                    d.style.setProperty('--fly-y', (endY - startY + (Math.random() - 0.5) * 30) + 'px');
+                    d.style.animationDelay = (i * 0.05) + 's';
+                    document.body.appendChild(d);
+                    setTimeout(() => d.remove(), 1200);
+                }
+            }
+
+            function spawnConfetti(sourceEl) {
+                const colors = ['#90ee90', '#1c1c1e', '#ffd966', '#e76f51', '#8e8e93'];
+                const r = sourceEl.getBoundingClientRect();
+                const cx = r.left + r.width / 2;
+                const cy = r.top + r.height / 2;
+                for (let i = 0; i < 12; i++) {
+                    const p = document.createElement('div');
+                    p.className = 'confetti-piece';
+                    p.style.background = colors[i % colors.length];
+                    p.style.left = cx + 'px';
+                    p.style.top = cy + 'px';
+                    const angle = (Math.PI * 2 * i) / 12;
+                    const dist = 30 + Math.random() * 40;
+                    p.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
+                    p.style.setProperty('--ty', Math.sin(angle) * dist + 'px');
+                    p.style.animationDelay = (Math.random() * 0.08) + 's';
+                    document.body.appendChild(p);
+                    setTimeout(() => p.remove(), 900);
+                }
+            }
+
+            // ==================== TOGGLE HABIT ====================
+            function handleToggle(index, btnEl) {
+                if (index < 0 || index >= habits.length) return;
+
+                const habitItem = habitList.querySelector(`.habit-item[data-index="${index}"]`);
+                const wasCompleted = habits[index].completed;
+
+                habits[index].completed = !wasCompleted;
+
+                if (habitItem) {
+                    habitItem.classList.toggle('completed-item', habits[index].completed);
+                }
+
+                if (btnEl) {
+                    if (habits[index].completed) {
+                        btnEl.classList.add('pulse', 'completing', 'completed');
+                        btnEl.setAttribute('aria-pressed', 'true');
+                        setTimeout(() => btnEl.classList.remove('pulse', 'completing'), 600);
+
+                        if (habitItem) {
+                            habitItem.classList.add('completing');
+                            setTimeout(() => habitItem.classList.remove('completing'), 600);
+                            spawnDollars(habitItem, 6);
+                            spawnConfetti(btnEl);
+                            const iconEl = habitItem.querySelector('.habit-icon');
+                            if (iconEl) {
+                                iconEl.classList.add('completing');
+                                setTimeout(() => iconEl.classList.remove('completing'), 550);
+                            }
+                        }
+
+                        playBump(moneyAmountContainer, 'bump');
+                        playBump(insightIcon, 'bump');
+                        showToast(t('savedToast')(formatCompact(habits[index].cost)));
+                    } else {
+                        btnEl.classList.add('uncompleting');
+                        btnEl.classList.remove('completed');
+                        btnEl.setAttribute('aria-pressed', 'false');
+                        setTimeout(() => btnEl.classList.remove('uncompleting'), 400);
+
+                        if (habitItem) {
+                            habitItem.classList.add('uncompleting');
+                            setTimeout(() => habitItem.classList.remove('uncompleting'), 400);
+                        }
+                        showToast(t('unmarkedToast'));
+                    }
+                }
+
+                const total = calculateTotal();
+                const formatted = formatCompact(total);
+                totalSavingsSpan.textContent = formatted;
+                todayPreview.textContent = formatted + ' $';
+
+                const completedCount = habits.filter(h => h.completed).length;
+                moneySubTextEl.textContent = t('moneySub')(completedCount);
+
+                history.dailySavings[history.dailySavings.length - 1] = total;
+                history.dailyCompleted[history.dailyCompleted.length - 1] = completedCount;
+                saveState();
+            }
+
+            // ==================== TOAST ====================
+            function showToast(message) {
+                if (toastTimeout) clearTimeout(toastTimeout);
+                toast.textContent = message;
+                toast.classList.add('show');
+                toastTimeout = setTimeout(() => toast.classList.remove('show'), 2000);
+            }
+
+            // ==================== EDIT HABITS MODAL ====================
+            function openEditModal() {
+                renderEditForm();
+                editModal.classList.add('active');
+            }
+
+            function renderEditForm() {
+                editFormContainer.innerHTML = habits.map((h, idx) => `
+                    <div class="edit-field" data-edit-index="${idx}">
+                        <label>${t('habit')} ${idx + 1}</label>
+                        <input type="text" class="edit-name" value="${escapeHtml(habitName(h))}" placeholder="${t('habitName')}" data-idx="${idx}">
+                        <div style="display:flex;gap:0.5rem;margin-top:0.4rem;">
+                            <input type="number" class="edit-cost" value="${h.cost}" min="0" step="0.01" placeholder="${t('cost')}" style="flex:1;" data-idx="${idx}">
+                            <button class="btn-danger" style="width:auto;padding:0.75rem 1rem;margin-top:0;" data-remove="${idx}">${t('remove')}</button>
+                        </div>
+                    </div>
+                `).join('') + `
+                    <div style="margin-top:0.5rem;">
+                        <button class="btn-secondary" style="width:100%;" id="addHabitBtn">${t('addHabit')}</button>
+                    </div>
+                `;
+
+                editFormContainer.querySelectorAll('[data-remove]').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const idx = parseInt(this.getAttribute('data-remove'), 10);
+                        habits.splice(idx, 1);
+                        habits.forEach((h, i) => { h.id = i; });
+                        renderEditForm();
+                    });
+                });
+
+                $('addHabitBtn').addEventListener('click', function() {
+                    habits.push({
+                        id: habits.length,
+                        nameKey: -1,
+                        name: currentLang === 'ru' ? 'новая привычка' : currentLang === 'uz' ? 'yangi odat' : 'new habit',
+                        icon: 'fa-star',
+                        cost: 1.00,
+                        completed: false
+                    });
+                    renderEditForm();
+                });
+            }
+
+            function saveHabits() {
+                const nameInputs = editFormContainer.querySelectorAll('.edit-name');
+                const costInputs = editFormContainer.querySelectorAll('.edit-cost');
+                if (nameInputs.length !== habits.length) return;
+
+                habits.forEach((h, idx) => {
+                    const nameVal = nameInputs[idx] ? nameInputs[idx].value.trim() : '';
+                    const costVal = costInputs[idx] ? parseFloat(costInputs[idx].value) : h.cost;
+                    if (nameVal) { h.name = nameVal; h.nameKey = -1; }
+                    h.cost = isNaN(costVal) || costVal < 0 ? 0 : costVal;
+                });
+
+                habits.forEach((h, i) => { h.id = i; });
+                editModal.classList.remove('active');
+                render();
+                showToast(t('habitsUpdated'));
+            }
+
+            // ==================== PROFILE ====================
+            function openProfileModal() {
+                const lifetime = history.dailySavings.reduce((a, b) => a + b, 0) + calculateTotal();
+                profileTotalSaved.textContent = formatCompact(lifetime) + ' $';
+                profileHabitCount.textContent = habits.length;
+                profileModal.classList.add('active');
+            }
+
+            // ==================== STATISTICS ====================
+            function openStatsModal() {
+                renderStatistics();
+                statsModal.classList.add('active');
+            }
+
+            function renderStatistics() {
+                const todayTotal = calculateTotal();
+                const savingsData = [...history.dailySavings];
+                savingsData[savingsData.length - 1] = todayTotal;
+
+                const maxVal = Math.max(...savingsData, 1);
+                const dayLabels = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+
+                chartBars.innerHTML = savingsData.map((val, i) => {
+                    const heightPct = Math.max((val / maxVal) * 100, 6);
+                    const isToday = i === savingsData.length - 1;
+                    return `<div class="chart-bar${isToday ? ' active' : ''}" style="height:${heightPct}%;">
+                        <span class="bar-label">${dayLabels[i] || ''}</span>
+                    </div>`;
+                }).join('');
+
+                statTodaySavings.textContent = formatCompact(todayTotal) + ' $';
+
+                const weekTotal = savingsData.reduce((a, b) => a + b, 0);
+                statWeekTotal.textContent = formatCompact(weekTotal) + ' $';
+
+                const trendPct = history.lastWeekTotal > 0
+                    ? ((weekTotal - history.lastWeekTotal) / history.lastWeekTotal) * 100
+                    : 0;
+                statTrend.textContent = (trendPct >= 0 ? '+' : '') + trendPct.toFixed(1) + ' %';
+                statTrend.className = trendPct >= 0 ? 'trend-up' : 'trend-down';
+
+                let bestIdx = 0, bestVal = 0;
+                savingsData.forEach((v, i) => { if (v > bestVal) { bestVal = v; bestIdx = i; } });
+                const dayNames = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+                statBestDay.textContent = `${t(dayNames[bestIdx])} — ${formatCompact(bestVal)} $`;
+
+                let breakdownHtml = habits.map(h => `
+                    <div class="stats-row">
+                        <span class="label">${escapeHtml(habitName(h))} (${formatCompact(h.cost)} $/day)</span>
+                        <span>${h.completed ? t('done') : t('pending')}</span>
+                    </div>
+                `).join('') || `<div class="empty-habits">${t('noHabits')}</div>`;
+
+                if (linkedCard) {
+                    const analysis = analyzeTransactions();
+                    breakdownHtml += `<h3 style="margin-top:1.5rem;">${t('analysisTitle')}</h3>`;
+                    breakdownHtml += `
+                        <div class="stats-row">
+                            <span class="label">${t('totalSpent')}</span>
+                            <span style="color:#d44;font-weight:700;">-${analysis.totalSpent.toFixed(2)} $</span>
+                        </div>
+                        <div class="stats-row">
+                            <span class="label">${t('totalSavedLabel')}</span>
+                            <span style="color:#2a9d8f;font-weight:700;">+${analysis.totalSaved.toFixed(2)} $</span>
+                        </div>
+                        <div class="stats-row">
+                            <span class="label">${t('savingsRate')}</span>
+                            <span>${analysis.savingsRate.toFixed(1)}%</span>
+                        </div>
+                    `;
+                    analysis.insights.forEach(ins => {
+                        breakdownHtml += `
+                            <div class="stats-row" style="font-size:0.8rem;">
+                                <span class="label" style="color:#5e5e62;">${ins.text}</span>
+                            </div>
+                        `;
+                    });
+                } else {
+                    breakdownHtml += `<div class="empty-habits" style="margin-top:1rem;">${t('noCardYet')}</div>`;
+                }
+
+                statsHabitBreakdown.innerHTML = breakdownHtml;
+            }
+
+            // ==================== CARD MODAL ====================
+            function openCardModal() {
+                renderCardContent();
+                cardModal.classList.add('active');
+            }
+
+            function renderCardContent() {
+                if (linkedCard) {
+                    const masked = '•••• •••• •••• ' + linkedCard.last4;
+                    cardContent.innerHTML = `
+                        <div class="card-display">
+                            <div class="card-chip"></div>
+                            <div class="card-number">${masked}</div>
+                            <div class="card-footer">
+                                <span>${escapeHtml(linkedCard.name)}</span>
+                                <span>${linkedCard.expiry}</span>
+                            </div>
+                            <i class="fab fa-cc-visa card-brand"></i>
+                        </div>
+                        <div class="linked-card-info">
+                            <span class="card-label">${t('linkedCard')}</span>
+                            <button class="unlink-btn" id="unlinkCardBtn">${t('unlink')}</button>
+                        </div>
+                        <div class="card-status-badge">
+                            <i class="fas fa-circle"></i> ${t('connectedSyncing')}
+                        </div>
+                        <div style="margin-top:1rem;">
+                            <button class="btn-primary" style="width:100%;" id="viewTransactionsBtn">${t('viewTransactions')}</button>
+                        </div>
+                    `;
+
+                    $('unlinkCardBtn').addEventListener('click', function() {
+                        linkedCard = null;
+                        saveState();
+                        renderCardContent();
+                        showToast(t('cardUnlinked'));
+                    });
+
+                    $('viewTransactionsBtn').addEventListener('click', function() {
+                        cardModal.classList.remove('active');
+                        setTimeout(openTransactionsModal, 200);
+                    });
+                } else {
+                    cardContent.innerHTML = `
+                        <div class="card-empty-state">
+                            <i class="fas fa-credit-card"></i>
+                            <p>${t('cardEmptyText')}</p>
+                        </div>
+                        <div class="card-input-group">
+                            <label>${t('cardholderName')}</label>
+                            <input type="text" id="cardNameInput" placeholder="Alex Morgan" maxlength="26">
+                        </div>
+                        <div class="card-input-group">
+                            <label>${t('cardNumber')}</label>
+                            <input type="text" id="cardNumberInput" placeholder="4242 4242 4242 4242" maxlength="19" inputmode="numeric">
+                        </div>
+                        <div class="card-input-row">
+                            <div class="card-input-group">
+                                <label>${t('expiry')}</label>
+                                <input type="text" id="cardExpiryInput" placeholder="MM/YY" maxlength="5">
+                            </div>
+                            <div class="card-input-group">
+                                <label>${t('cvv')}</label>
+                                <input type="text" id="cardCvvInput" placeholder="•••" maxlength="4" inputmode="numeric">
+                            </div>
+                        </div>
+                        <button class="btn-primary" style="width:100%;margin-top:0.5rem;" id="linkCardBtn">${t('linkSecurely')}</button>
+                        <p style="font-size:0.7rem;color:#8e8e93;text-align:center;margin-top:0.6rem;font-weight:500;">${t('demoNote')}</p>
+                    `;
+
+                    $('cardNumberInput').addEventListener('input', function() {
+                        let v = this.value.replace(/\D/g, '').slice(0, 16);
+                        this.value = v.replace(/(\d{4})(?=\d)/g, '$1 ');
+                    });
+
+                    $('cardExpiryInput').addEventListener('input', function() {
+                        let v = this.value.replace(/\D/g, '').slice(0, 4);
+                        if (v.length >= 3) v = v.slice(0, 2) + '/' + v.slice(2);
+                        this.value = v;
+                    });
+
+                    $('linkCardBtn').addEventListener('click', function() {
+                        const name = $('cardNameInput').value.trim();
+                        const number = $('cardNumberInput').value.replace(/\s/g, '');
+                        const expiry = $('cardExpiryInput').value.trim();
+                        const cvv = $('cardCvvInput').value.trim();
+
+                        if (!name) { showToast(t('pleaseEnterName')); return; }
+                        if (number.length < 16) { showToast(t('pleaseEnterCard')); return; }
+                        if (!/^\d{2}\/\d{2}$/.test(expiry)) { showToast(t('pleaseEnterExpiry')); return; }
+                        if (cvv.length < 3) { showToast(t('pleaseEnterCvv')); return; }
+
+                        linkedCard = { name, last4: number.slice(-4), expiry };
+                        saveState();
+                        renderCardContent();
+                        showToast(t('cardLinked'));
+
+                        transactions.unshift({
+                            id: transactions.length + 1,
+                            name: t('cardLinkedTx'),
+                            date: t('justNow'),
+                            amount: 0,
+                            icon: 'fa-credit-card',
+                            category: 'other'
+                        });
+                        saveState();
+                    });
+                }
+            }
+
+            // ==================== TRANSACTIONS MODAL ====================
+            function openTransactionsModal() {
+                renderTransactions();
+                transactionsModal.classList.add('active');
+            }
+
+            function renderTransactions() {
+                const analysis = analyzeTransactions();
+
+                let html = `
+                    <div class="stats-section">
+                        <h3>${t('summary')}</h3>
+                        <div class="stats-row">
+                            <span class="label">${t('totalSpent')}</span>
+                            <span style="color:#d44;font-weight:700;">-${analysis.totalSpent.toFixed(2)} $</span>
+                        </div>
+                        <div class="stats-row">
+                            <span class="label">${t('totalSavedLabel')}</span>
+                            <span style="color:#2a9d8f;font-weight:700;">+${analysis.totalSaved.toFixed(2)} $</span>
+                        </div>
+                        <div class="stats-row">
+                            <span class="label">${t('net')}</span>
+                            <span style="font-weight:700;">${(analysis.totalSaved - analysis.totalSpent).toFixed(2)} $</span>
+                        </div>
+                        <div class="stats-row">
+                            <span class="label">${t('savingsRate')}</span>
+                            <span style="font-weight:700;">${analysis.savingsRate.toFixed(1)}%</span>
+                        </div>
+
+                        <h3>${t('insights')}</h3>
+                        ${analysis.insights.map(ins => `
+                            <div class="stats-row">
+                                <span class="label" style="font-size:0.8rem;">${ins.text}</span>
+                            </div>
+                        `).join('')}
+
+                        <h3>${t('recentTransactions')}</h3>
+                        <div class="transaction-list">
+                `;
+
+                transactions.forEach(tx => {
+                    const isPos = tx.amount > 0;
+                    const amountClass = isPos ? 'positive' : 'negative';
+                    const iconClass = isPos ? 'saved' : 'spent';
+                    const displayAmount = tx.amount === 0 ? '—' : (isPos ? '+' : '') + tx.amount.toFixed(2) + ' $';
+
+                    html += `
+                        <div class="transaction-item">
+                            <div class="transaction-left">
+                                <div class="transaction-icon ${iconClass}">
+                                    <i class="fas ${tx.icon}"></i>
+                                </div>
+                                <div class="transaction-info">
+                                    <div class="transaction-name">${escapeHtml(tx.name)}</div>
+                                    <div class="transaction-date">${tx.date}</div>
+                                </div>
+                            </div>
+                            <div class="transaction-amount ${amountClass}">${displayAmount}</div>
+                        </div>
+                    `;
+                });
+
+                html += `</div></div>`;
+                transactionsContent.innerHTML = html;
+            }
+
+            // ==================== EVENT BINDING ====================
+            langSwitcher.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    setLanguage(this.getAttribute('data-lang'));
+                });
+            });
+
+            editLink.addEventListener('click', e => { e.preventDefault(); openEditModal(); });
+            closeEditModal.addEventListener('click', () => editModal.classList.remove('active'));
+            saveHabitsBtn.addEventListener('click', saveHabits);
+            profileAvatarBtn.addEventListener('click', openProfileModal);
+            profileAvatarBtn.addEventListener('keydown', e => {
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openProfileModal(); }
+            });
+            closeProfileModal.addEventListener('click', () => profileModal.classList.remove('active'));
+            openStatsFromProfile.addEventListener('click', () => {
+                profileModal.classList.remove('active');
+                setTimeout(openStatsModal, 200);
+            });
+            openCardFromProfile.addEventListener('click', () => {
+                profileModal.classList.remove('active');
+                setTimeout(openCardModal, 200);
+            });
+            closeStatsModal.addEventListener('click', () => statsModal.classList.remove('active'));
+            closeCardModal.addEventListener('click', () => cardModal.classList.remove('active'));
+            closeTransactionsModal.addEventListener('click', () => transactionsModal.classList.remove('active'));
+
+            [editModal, profileModal, statsModal, cardModal, transactionsModal].forEach(m => {
+                m.addEventListener('click', function(e) {
+                    if (e.target === this) this.classList.remove('active');
+                });
+            });
+
+            document.addEventListener('keydown', e => {
+                if (e.key === 'Escape') {
+                    [editModal, profileModal, statsModal, cardModal, transactionsModal].forEach(m => m.classList.remove('active'));
+                }
+            });
+
+            // ==================== INIT ====================
+            if (!saved) {
+                saveState();
+            }
+            
+            // Initial render
+            setLanguage(currentLang);
+
+        })();
+    </script>
+</body>
+</html>
